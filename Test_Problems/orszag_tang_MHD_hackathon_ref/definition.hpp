@@ -23,7 +23,7 @@
 #define TSTOP     0.5 //3.2
 
 /* INNER OUTPUT (put 0 if you want only first and last)*/
-#define NOUTPUT   10
+#define NOUTPUT   0
 
 #define GAMMA_EOS (5.0/3.0)  /* Specific heat ratio */
 

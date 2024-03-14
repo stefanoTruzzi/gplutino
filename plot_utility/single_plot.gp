@@ -8,8 +8,8 @@ prs = 7
 bx1 = 8
 bx2 = 9
 bx3 = 10
-set xrange[-0.5:0.5]
-set yrange[-1.0:1.0]
+set xrange[0.0:1.0]
+set yrange[0.0:1.0]
 set pm3d map
 #splot "data.0004.out" u 1:2:8
 

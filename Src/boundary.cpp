@@ -6,7 +6,8 @@ int boundary_conditions(double ***v, int ibeg, int iend, int jbeg, int jend){
 //ibeg = 0;  iend = NX+2*NGHOST;
 //jbeg = 0; jend = NY+2*NGHOST;
   int i,  j;
-
+  
+  mynvtxstart_("BOUNDARY",YELLOW);
   for (j = 0; j < jend + NGHOST; j++){
   for (i = 1; i <= NGHOST; i++){
     for (int nv = 0; nv < NVAR; nv++){
@@ -34,6 +35,8 @@ int boundary_conditions(double ***v, int ibeg, int iend, int jbeg, int jend){
       #endif
     }
   }}
+  mynvtxstop_();
+
   return(0);
 } 
 /* ********************************************************************* */

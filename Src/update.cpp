@@ -33,8 +33,8 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   #if (DIMENSIONS == DIMX1) || (DIMENSIONS == DIM_2D) 
   // Start of x-direction R cycle
   SetVectorIndices(IDIR);
-
-
+  
+  mynvtxstart_("UPDATE",RED);
   mynvtxstart_("X_Cycle UPDATE",BLUE);
   for(j = jbeg; j <= jend; j++){
     for(i = 0; i < iend+NGHOST; i++){ 
@@ -74,6 +74,8 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     }
   }
   mynvtxstop_();
+  
+
   time_t stop;
 
   #endif
@@ -131,7 +133,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   }
   #endif
   mynvtxstop_();
-
+  mynvtxstop_();
   #ifdef DEBUG_DIVB
   printf( "y_divB max = %f --- y_divB min = %f \n",divB_max,divB_min);
   #endif

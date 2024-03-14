@@ -10,7 +10,7 @@ plutino:                              # Default target
 CC       = g++
 CFLAGS   = -c -O3 -Wundef
 LDFLAGS  = -lm
-PLUTINO_DIR    = /home/truzzi/gplutino
+#PLUTINO_DIR    = /home/truzzi/gplutino
 SRC          = $(PLUTINO_DIR)/Src
 INCLUDE_DIRS = -I. -I$(SRC)
 VPATH        = ./:$(SRC) 
@@ -25,7 +25,7 @@ HEADERS = plutino.hpp prototypes.hpp macro.hpp definition.hpp structs.hpp
 OBJ = main.o initial_conditions.o arrays.o boundary.o \
 			cons_to_prim.o debug.o flux.o input_output.o \
 			reconstruct.o riemann.o rungekutta.o set_indexes.o \
-			source.o update.o wave_speed.o ntvx.o
+			source.o update.o wave_speed.o nvtx.o
 			
 #include $(SRC)/Math_Tools/makefile
 
