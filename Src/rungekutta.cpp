@@ -37,6 +37,8 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
   dt = update(datainfo, V, R, ibeg, iend, jbeg, jend, dx,dy); //gli passo il 3d
 	//calcolo R e poi aggiorno U
 	// U1 = U+ dt*R1
+  
+  mynvtxstart_("RK update STAGE 1", YELLOW);
 	for(int i= ibeg; i <= iend; i++){
   for(int j= jbeg; j <= jend; j++){
 		for(int nvar =0; nvar < NVAR; nvar++){
@@ -44,9 +46,11 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
     }
     cons_to_prim(U1[i][j],V1[i][j]); 
   }}
-
+  mynvtxstop_();
   boundary_conditions(V1,ibeg,iend,jbeg,jend);
   update(datainfo, V1,R1, ibeg, iend, jbeg, jend, dx, dy);
+    
+  mynvtxstart_("RK update STAGE 2", ORANGE);
   for(int i= ibeg; i <= iend; i++){
   for(int j= jbeg; j <= jend; j++){
 		for(int nvar =0; nvar < NVAR; nvar++){
@@ -55,6 +59,8 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
     }
     cons_to_prim(U[i][j],V[i][j]); 
   }}
+  mynvtxstop_();
+
 	return (dt);
 }
 

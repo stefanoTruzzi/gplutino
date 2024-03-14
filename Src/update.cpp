@@ -93,7 +93,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     
   SetVectorIndices(JDIR);
   
-  mynvtxstart_("Y_Cycle UPDATE",SILVER);
+  mynvtxstart_("Y_Cycle UPDATE",CYAN);
   for(i = ibeg; i <= iend; i++){
     for(j = 0; j < jend+NGHOST; j++){
       for(nv = 0; nv < NVAR; nv++) v1D[j][nv] = V[i][j][nv];

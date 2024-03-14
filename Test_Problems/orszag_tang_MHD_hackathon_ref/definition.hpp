@@ -20,7 +20,7 @@
 
 /* TIME */
 #define TSTART    1e-4
-#define TSTOP     0.5 //3.2
+#define TSTOP     0.002 //3.2
 
 /* INNER OUTPUT (put 0 if you want only first and last)*/
 #define NOUTPUT   0
@@ -63,3 +63,4 @@
 #endif
 /* ****************************************************************** */
 
+#define _USE_NVTX

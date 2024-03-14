@@ -40,7 +40,7 @@ CFLAGS  = -c -acc -std=c++17 -gpu=rdc,managed,lineinfo -Minfo=accel -Minline=100
 LDFLAGS = -lm -acc -gpu=rdc,managed -cudalib=nccl -lnccl -cudalib=nvtx3
 
 
-nsys profile --trace=cuda,nvtx,openacc -o NOME_REPORT ./pluto
+nsys profile --trace=cuda,nvtx,openacc -o NOME_REPORT -f true ./pluto
 
 nsys-ui
 

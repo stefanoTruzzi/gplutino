@@ -7,7 +7,7 @@ int boundary_conditions(double ***v, int ibeg, int iend, int jbeg, int jend){
 //jbeg = 0; jend = NY+2*NGHOST;
   int i,  j;
   
-  mynvtxstart_("BOUNDARY",YELLOW);
+  mynvtxstart_("BOUNDARY",PURPLE);
   for (j = 0; j < jend + NGHOST; j++){
   for (i = 1; i <= NGHOST; i++){
     for (int nv = 0; nv < NVAR; nv++){

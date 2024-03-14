@@ -41,6 +41,7 @@ int main()
   U = Array3D(NX + 2*NGHOST, NY+2*NGHOST, NVAR); // Conservative
   V = Array3D(NX + 2*NGHOST, NY+2*NGHOST, NVAR); // Primitive 
   
+  mynvtxstart_("GRID_INIT",DARKGREEN);
   /* START GRID INITALIZATION ********************************************* */
   dx = (xend - xbeg)/(double)NX;
   dy = (yend - ybeg)/(double)NY;
@@ -67,14 +68,18 @@ int main()
     prim_to_cons(V[i][j], U[i][j]); 
   }}
   /* END OF GRID INITIALIZATION ******************************************* */
-  
+  mynvtxstop_();
+
   /* starting time */
   
   t=tin;  
   nstep = 0;
   double lambda_max,lambda;  
+  
+  mynvtxstart_("SAVE INIT COND",WHITE);
   Output (x,y, V, ibeg, iend, jbeg, jend);
-    
+  mynvtxstop_();
+  
   mynvtxstart_("Time cycle",GREEN);
   time_t start_time_cycle;
   time(&start_time_cycle);   // get current time.
@@ -97,9 +102,8 @@ int main()
       #error Invalid order
     #endif
     // update step and t
-    
     printf("Nstep: %d , time: %f , dt %f lambda_max %f, dxyzmax %f \n" ,nstep, t,datainfo.dt_update, datainfo.lambda_max, datainfo.dxyzmax);
-    
+
     nstep++;
     t=t+dt;
   }
@@ -110,7 +114,9 @@ int main()
   printf("Total_Time = %f seconds \n",diff_t);
   mynvtxstop_();
 
-
+  mynvtxstart_("SAVE LAST COND",WHITE);
   Output (x,y, V, ibeg, iend, jbeg, jend);
+  mynvtxstop_();
+
   return (0);
 }
