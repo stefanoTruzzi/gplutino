@@ -5,22 +5,24 @@
 double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, int jbeg, int jend, double dx, double dy)
 /* 
  *********************************************************************** */
-{
+{ 
+  int dimensions = 2;
   int j,i,nv;
   int dim_max;
   int debug_flag = 0;
-  double dxyzmax,dt, lambda,lambda_max = 0.0;
-  static double **f, **vl,  **vr, **v1D;
-  static double *Bn,*divB, **source;
+  double dxyzmax,dt, lambda,lambda_max;
+  static double **f, **vl,  **vr, **v1D, **lambda_matrix,**source;
+  static double *Bn,*divB;
 
   #ifdef DEBUG_DIVB
   double divB_max = -99999999.9;
   double divB_min = 99999999.9;
   #endif
-
+  
   dim_max = MAX(NX,NY);
   
   if(v1D==NULL){
+    lambda_matrix = Array2D(NX+2*NGHOST,NY+2*NGHOST);
     f   = Array2D(dim_max+2*NGHOST,NVAR);
     vl  = Array2D(dim_max+2*NGHOST,NVAR);
     vr  = Array2D(dim_max+2*NGHOST,NVAR);
@@ -42,8 +44,12 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     }
   //debug_flag = simmetry1DCheck(v1D,ibeg,iend);
     reconstruct ( v1D , vl , vr , ibeg-1 , iend+1 ); 
-    lambda = riemannLF   (  vl , vr ,  f , ibeg , iend+1 , IDIR, dx); 
-    lambda_max = MAX(lambda_max,lambda);
+  for(i=ibeg;i<= iend+1; i++){
+    lambda = riemannLF (vl[i] , vr[i] ,  f[i] , IDIR);
+    lambda_matrix[i][j] = lambda /dx;
+    //printf("lambda_max[%d][%d]  = %f: \n", i,j,lambda_matrix[i][j]);
+  }
+    
   // riemannHLLC(vl,vr,f,ibeg,iend+1,0); 
   // debug_flag = simmetry1DCheck(f,ibeg,iend);
     // j is fixed outside cycle. dt is in RK
@@ -52,7 +58,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
         Bn[i] = 0.5 * (vl[i][BXn] + vr[i][BXn]);
       }
       for(int i = ibeg ; i<= iend; i++){
-        divB[i] = (Bn[i+1]-Bn[i])/dx; 
+        divB[i] = (Bn[i+1] - Bn[i]) / dx; 
         powell_source(v1D[i],source[i],divB[i]);
 
         #ifdef DEBUG_DIVB
@@ -68,7 +74,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
           #if SOURCE == POWELL
           //R[i][j][nv] += dt*0.5*(source[j][nv]);
           //the dt is in the RK
-          R[i][j][nv] += (source[i][nv]);
+          R[i][j][nv] += source[i][nv];
           #endif
         }
     }
@@ -99,8 +105,15 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
       for(nv = 0; nv < NVAR; nv++) v1D[j][nv] = V[i][j][nv];
     }
     reconstruct(v1D, vl, vr, jbeg-1, jend+1);
-    lambda = riemannLF(vl, vr, f, jbeg, jend+1, JDIR, dy);
-    lambda_max = MAX(lambda,lambda_max);
+    for(j=0;j<= jend+1; j++){
+      lambda = riemannLF (  vl[j] , vr[j] ,  f[j] , JDIR);
+      #if DIMENSION == DIMX2
+        lambda_matrix[i][j] = lambda / dy;
+      #else
+        lambda_matrix[i][j] += lambda / dy;
+      #endif
+    }
+       
 //    riemannHLLC(vl, vr, f, jbeg, jend+1, 1);
 //    debug_flag = simmetry1DCheck(f,jbeg,jend);
     #if SOURCE == POWELL
@@ -108,7 +121,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
         Bn[j] = 0.5 * (vl[j][BXn] + vr[j][BXn]);
       }
       for(int j = jbeg ; j<= jend; j++){
-        divB[j] = (Bn[j+1]-Bn[j])/dy; 
+        divB[j] = (Bn[j+1] - Bn[j]) / dy; 
         powell_source(v1D[j],source[j],divB[j]);
 
         #ifdef DEBUG_DIVB
@@ -119,16 +132,18 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     #endif
 
     for(j = jbeg; j <= jend; j++){
-      #if DIMENSIONS == DIMX2
-        for(nv = 0; nv < NVAR; nv++) R[i][j][nv] = -(f[j+1][nv] - f[j][nv])/dy; 
-      #else
-        for(nv = 0; nv < NVAR; nv++) R[i][j][nv] -= (f[j+1][nv] - f[j][nv])/dy; 
-        #if SOURCE == POWELL
-          //R[i][j][nv] += dt*(source[j][nv]);
-          //the dt is in the RK
-          R[i][j][nv] += (source[j][nv]);
+      for(nv = 0; nv < NVAR; nv++){
+        #if DIMENSIONS == DIMX2
+          R[i][j][nv] = -(f[j+1][nv] - f[j][nv])/dy; 
+        #else
+          R[i][j][nv] -= (f[j+1][nv] - f[j][nv])/dy; 
+          #if SOURCE == POWELL
+            //R[i][j][nv] += dt*(source[j][nv]);
+            //the dt is in the RK
+            R[i][j][nv] += source[j][nv];
+          #endif
         #endif
-      #endif
+      }
     }
   }
   #endif
@@ -144,8 +159,14 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   #if DIMENSIONS == DIMX2 
   dx = dy;
   #endif
+
+  lambda_max = 0.0;
+  for(int i = ibeg;i<=iend;i++){
+    for(int j=jbeg; j<= jend; j++)
+    lambda_max = MAX(lambda_matrix[i][j],lambda_max);
+  }
   dxyzmax = MAX(dx,dy);
-  dt = (double)CFL*dxyzmax/lambda_max;
+  dt = (double)CFL* DIMENSIONS/lambda_max;
   
   datainfo.lambda_max = lambda_max;
   datainfo.dxyzmax = dxyzmax;

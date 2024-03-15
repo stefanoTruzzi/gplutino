@@ -1,5 +1,5 @@
 /* can be POWELL or NOSOURCE*/
-#define SOURCE NOSOURCE
+#define SOURCE POWELL
 /* can be PERIODIC or OUTFLOW*/
 #define BOUND  PERIODIC
 /* cna be 1 or 2*/
@@ -13,17 +13,17 @@
 #define YEND      1.0
 
 /* grid dimensiones */
-#define NX        1024
-#define NY        1024
+#define NX        512
+#define NY        512
 
-#define CFL 0.3 //MAX 0.4 for 2D application
+#define CFL 0.4 //MAX 0.4 for 2D application
 
 /* TIME */
 #define TSTART    1e-4
-#define TSTOP     0.5 //3.2
+#define TSTOP     3.1000001 //3.2
 
 /* INNER OUTPUT (put 0 if you want only first and last)*/
-#define NOUTPUT   0
+#define NOUTPUT   50
 
 #define GAMMA_EOS (5.0/3.0)  /* Specific heat ratio */
 

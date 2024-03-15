@@ -13,7 +13,7 @@ int powell_source(double *v, double *s, double divB)
   s[BX2] = -v[VX2] * divB;
   s[BX3] = -v[VX3] * divB;
   
-  s[ENG] = -divB* (v[VX1] * v[BX1] + v[VX2] * v[BX2] + v[VX3] * v[BX3]);
+  s[ENG] = -divB * (v[VX1] * v[BX1] + v[VX2] * v[BX2] + v[VX3] * v[BX3]);
 
   return(0);
 }

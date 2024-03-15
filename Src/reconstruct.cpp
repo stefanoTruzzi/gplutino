@@ -7,21 +7,15 @@ int reconstruct(double **v,double **vl, double **vr, int ibeg, int iend)
  *
  *********************************************************************** */
 {
-  double deltau;
-  double slope_a;
-  double slope_b;
+  double slope_best;
+  double slope_next;
+  double slope_prev;
 
   #if ORDER == 1
   for(int i = ibeg; i <= iend;i++){
     for(int nv = 0; nv<NVAR;nv++){     
-      // PLUTO REF
-      // qL[i]   = q[i];
-      // qR[i-1] = q[i];
-
       vl[i+1][nv]= v[i][nv];
       vr[i][nv]  = v[i][nv];
-      
-      
     }
   }
   
@@ -29,22 +23,23 @@ int reconstruct(double **v,double **vl, double **vr, int ibeg, int iend)
   for(int i = ibeg; i <=iend;i++){
 
     for(int nv = 0; nv<NVAR;nv++){
-      slope_a = v[i+1][nv]-v[i][nv];
-      slope_b = v[i][nv]-v[i-1][nv];
+      slope_next = v[i+1][nv]-v[i][nv];
+      slope_prev = v[i][nv]-v[i-1][nv];
       
-      if( slope_a * slope_b > 0.0){ 
-        if(fabs(slope_a) < fabs(slope_b)){
-            deltau = slope_a;
+      #if LIMITER == LIM_MINMOD
+        if( slope_next * slope_prev > 0.0){ 
+          if(fabs(slope_next) < fabs(slope_prev)) slope_best = slope_next;
+          else                                    slope_best = slope_prev;
         }
-        else deltau = slope_b;
-      }
-      else deltau = 0.0;
-      //qL[i]   = q[i] + 0.5*dq;  pluto
-      //qR[i-1] = q[i] - 0.5*dq;  pluto
-      //vr[i][nv]   = v[i][nv] + 0.5*deltau; MINE OLD
-      //vl[i+1][nv] = v[i][nv] - 0.5*deltau; MINE OLD
-      vl[i+1][nv] = v[i][nv] + 0.5*deltau;   // like pluto left  is +0.5 
-      vr[i][nv] = v[i][nv] - 0.5*deltau;   // like pluto left  is +0.5 
+        else slope_best = 0.0;
+      #else
+        if( slope_next * slope_prev > 0.0) 
+          slope_best = 2.0 * slope_next * slope_prev / (slope_next + slope_prev);
+        else slope_best = 0.0;
+      #endif
+      
+      vl[i+1][nv] = v[i][nv] + 0.5*slope_best;   // like pluto left  is +0.5 
+      vr[i][nv] = v[i][nv] - 0.5*slope_best;   // like pluto left  is +0.5 
 
     }
   }

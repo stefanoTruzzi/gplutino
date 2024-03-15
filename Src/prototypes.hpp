@@ -38,7 +38,7 @@ int reconstruct(double **,double **, double **, int, int);
 /* ********************************************************************* */
 
 /* riemann.cpp ********************************************************* */
-double riemannLF(double **, double **, double **, int, int, int, double);
+double riemannLF(double *, double *, double *, int);
 int riemannHLLC(double **, double **, double **, int, int, int, double);
 /* ********************************************************************* */
 

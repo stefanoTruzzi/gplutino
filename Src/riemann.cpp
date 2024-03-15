@@ -2,42 +2,31 @@
 
 
 /* ********************************************************************* */
-double riemannLF(double **vl, double **vr, double **f,int ibeg,int iend, int direction, double dxn)
+double riemannLF(double *vl, double *vr, double *f, int direction)
 /*  f_index e' l indice della riga che viene passato
  *
  *********************************************************************** */
 {
-  //int    VXn = VX1 + direction;
-  //int    BXn = BX1 + direction;
   double ul[NVAR], ur[NVAR];
   double sourcel[NVAR], sourcer[NVAR];
   double fl[NVAR], fr[NVAR];
   double lambda_max;
-  double dim_max = MAX(NX,NY);
 
-  /*
-  for(int i = ibeg ; i<= iend; i++){
-    printf( "vl %f vr %f Bn: %f Bn+1 %f divB: %f index: %d \n",vl[i][BXn], vr[i][BXn], Bn[i],Bn[i+1],divB[i], i);
+  //calcolo ul che mi servira' per aggiornare i flussi
+  // ognu ul ha 4 componenti le calcolo fuori dato che sono tutte diverse
+  prim_to_cons(vl,ul);
+  prim_to_cons(vr,ur);
+
+  lambda_max = MaxSignalSpeedlr(vl,vr);
+  flux_single(vl, ul, fl);
+  flux_single(vr, ur, fr);
+
+  for(int nv = 0; nv < NVAR; nv++){
+    f[nv] = 0.5*(fl[nv]+fr[nv]) - 0.5*lambda_max*(ur[nv]-ul[nv]);  
+    
   }
-  printf("\n");
-  */
-
-  for(int i = ibeg ; i<= iend; i++){
-    //calcolo ul che mi servira' per aggiornare i flussi
-    // ognu ul ha 4 componenti le calcolo fuori dato che sono tutte diverse
-    prim_to_cons(vl[i],ul);
-    prim_to_cons(vr[i],ur);
-
-    lambda_max = MaxSignalSpeedlr(vl[i],vr[i]);
-    flux_single(vl[i], ul, fl);
-    flux_single(vr[i], ur, fr);
-
-    for(int nv = 0; nv < NVAR; nv++){
-      f[i][nv] = 0.5*(fl[nv]+fr[nv]) - 0.5*lambda_max*(ur[nv]-ul[nv]);  
-     
-    }
-    //Show1DArray(f[i]);
-  }
+  //Show1DArray(f[i]);
+  
   //printf(" %f \t", lambda_max);
 
   return(lambda_max);
