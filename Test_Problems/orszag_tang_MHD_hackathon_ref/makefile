@@ -9,8 +9,8 @@ plutino:                              # Default target
 #ARCH         = Linux.gcc.defs
 
 CC      = nvc++
-CFLAGS  = -c -O3 -cudalib=nvtx3 -D_USE_NVTX
-LDFLAGS = -lm -cudalib=nvtx3
+CFLAGS  = -c -O3 -cudalib=nvtx3 -D_USE_NVTX -acc -Minfo=accel
+LDFLAGS = -lm -cudalib=nvtx3 -acc
 
 #PLUTINO_DIR    = /home/truzzi/gplutino
 SRC          = $(PLUTINO_DIR)/Src

@@ -36,11 +36,22 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   // Start of x-direction R cycle
   SetVectorIndices(IDIR);
   
+  #pragma acc parallel loop private (v1D[:dim_max+2*NGHOST][:NVAR]) //takes the next loop (j) and divide it over SM and Threads 
+  for(j = jbeg; j <= jend; j++){
+    for(i = 0; i < iend+NGHOST; i++){ 
+      for(nv = 0; nv < NVAR; nv++) v1D[i][nv] = V[i][j][nv]; // 64megabytes (ABOUT)
+      // 2 instructions
+      // load V[i][j]...
+      // store V1D[i][nv]
+      // SM 32 (core) same operations
+    }}
+
+
   mynvtxstart_("UPDATE",RED);
   mynvtxstart_("X_Cycle UPDATE",BLUE);
   for(j = jbeg; j <= jend; j++){
     for(i = 0; i < iend+NGHOST; i++){ 
-      for(nv = 0; nv < NVAR; nv++) v1D[i][nv] = V[i][j][nv];
+      for(nv = 0; nv < NVAR; nv++) v1D[i][nv] = V[i][j][nv]; // 64megabytes (ABOUT)
     }
   //debug_flag = simmetry1DCheck(v1D,ibeg,iend);
     reconstruct ( v1D , vl , vr , ibeg-1 , iend+1 ); 

@@ -4,6 +4,7 @@
 #define BOUND  PERIODIC
 /* cna be 1 or 2*/
 #define ORDER     2
+#define LIMITER LIM_VANLEER
 
 #define GAMMA_EOS 5.0/3.0
 
@@ -22,7 +23,7 @@
 
 /* TIME */
 #define TSTART    1e-4
-#define TSTOP     0.5
+#define TSTOP     0.5025
 
 /* INNER OUTPUT (put 0 if you want only first and last)*/
 #define NOUTPUT   0
