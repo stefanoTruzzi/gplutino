@@ -23,7 +23,7 @@
 
 /* TIME */
 #define TSTART    1e-4
-#define TSTOP     0.5025
+#define TSTOP     0.5
 
 /* INNER OUTPUT (put 0 if you want only first and last)*/
 #define NOUTPUT   0

@@ -14,16 +14,21 @@ double riemannLF(double *vl, double *vr, double *f, int direction)
 
   //calcolo ul che mi servira' per aggiornare i flussi
   // ognu ul ha 4 componenti le calcolo fuori dato che sono tutte diverse
+  
+  //#pragma acc loop seq
   prim_to_cons(vl,ul);
+  //#pragma acc loop seq
   prim_to_cons(vr,ur);
-
+  //#pragma routine seq
   lambda_max = MaxSignalSpeedlr(vl,vr);
+  //#pragma routine seq
   flux_single(vl, ul, fl);
+  //#pragma acc loop seq
   flux_single(vr, ur, fr);
 
+  #pragma acc loop seq
   for(int nv = 0; nv < NVAR; nv++){
     f[nv] = 0.5*(fl[nv]+fr[nv]) - 0.5*lambda_max*(ur[nv]-ul[nv]);  
-    
   }
   //Show1DArray(f[i]);
   

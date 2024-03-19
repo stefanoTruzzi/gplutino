@@ -12,6 +12,8 @@ int boundary_conditions(double ***, int, int, int, int);
 
 /* cons_and_prim.cpp *************************************************** */
 int cons_to_prim(double *, double *);
+
+#pragma acc routine seq
 int prim_to_cons(double *, double *);
 /* ********************************************************************* */
 
@@ -21,6 +23,7 @@ int simmetry1DCheck(double **, int , int);
 /* ********************************************************************* */
 
 /* flux.cpp ************************************************************ */
+#pragma acc routine seq
 int flux_single(double *, double *, double *);
 int ustar_single(double *, double *, double *, double, double, int);
 /* ********************************************************************* */
@@ -34,10 +37,12 @@ int    Output    (double *,double *, double ***,int,int, int, int);
 /* ********************************************************************* */
 
 /* reconstruct.cpp ***************************************************** */
-int reconstruct(double **,double **, double **, int, int);
+#pragma acc routine vector
+int reconstruct(double *,double *, double *, int, int);
 /* ********************************************************************* */
 
 /* riemann.cpp ********************************************************* */
+#pragma acc routine vector
 double riemannLF(double *, double *, double *, int);
 int riemannHLLC(double **, double **, double **, int, int, int, double);
 /* ********************************************************************* */
@@ -53,11 +58,14 @@ double update(DataInfo&, double ***, double ***, int, int, int, int, double, dou
 /* ********************************************************************* */
 
 /* wave_speed.cpp ****************************************************** */
+#pragma acc routine seq
 double MaxSignalSpeed(double *);
+#pragma acc routine seq
 double MaxSignalSpeedlr(double *, double *);
 /* ********************************************************************* */
 
 /* source.cpp ********************************************************** */
+#pragma acc routine seq
 int powell_source(double *, double *, double);
 /* ********************************************************************* */
 

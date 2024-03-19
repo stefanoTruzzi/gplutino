@@ -8,7 +8,7 @@ plutino:                              # Default target
 
 #ARCH         = Linux.gcc.defs
 CC       = g++
-CFLAGS   = -c -O3 -Wundef
+CFLAGS   = -c -O3 -Wundef -fPIC
 LDFLAGS  = -lm
 #PLUTINO_DIR    = /home/truzzi/gplutino
 SRC          = $(PLUTINO_DIR)/Src

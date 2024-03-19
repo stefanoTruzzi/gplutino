@@ -7,7 +7,7 @@ int flux_single(double *v, double *u, double *f)
  *
  *********************************************************************** */
 {
-  double ptot; 
+	double ptot; 
   // HD  = P
   // MHD = P + Pmag
 
