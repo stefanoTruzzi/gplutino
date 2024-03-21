@@ -37,6 +37,7 @@
 /* ONLY DIMX2 to test the software only in Y direction (1D) */
 /* DIM_2D to launch the software with both X and Y */
 #define DIMENSIONS DIM_2D
+//#define DIMENSIONS DIMX1  
 
 /* VARIABLES DEFINITION ********************************************* */
 #if PHYSICS == HD

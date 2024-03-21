@@ -43,7 +43,7 @@ int reconstruct(double *,double *, double *, int, int);
 
 /* riemann.cpp ********************************************************* */
 #pragma acc routine vector
-double riemannLF(double *, double *, double *, int);
+double riemannLF(double *, double *, double *, int, int);
 int riemannHLLC(double **, double **, double **, int, int, int, double);
 /* ********************************************************************* */
 

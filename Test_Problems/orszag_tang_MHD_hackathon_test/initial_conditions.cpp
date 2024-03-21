@@ -13,14 +13,13 @@ void Initial_Condition(double x1, double x2, double *v)
   v[RHO] = 25.0/9.0; 
   v[PRS] = 5.0/3.0;
 
-  v[VX1]= -sin(2.0*M_PI*y);
-  v[VX2]=  sin(2.0*M_PI*x);
-  v[VX3]=  0.0;
+  v[VX1] = -sin(2.0*M_PI*y);
+  v[VX2] =  sin(2.0*M_PI*x);
+  v[VX3] =  0.0;
 
-
-  #if PHYSICS == IDEALMHD
+  #if PHYSICS == IDEALMHD 
   	v[BX1]= -sin(2.0*M_PI*y);
 	v[BX2]=  sin(4.0*M_PI*x);
-  	v[BX3]=  0.0;
+	v[BX3]=  0.0;
   #endif
 }

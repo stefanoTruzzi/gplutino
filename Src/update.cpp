@@ -20,8 +20,9 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   #endif
   
   dim_max = MAX(NX,NY);
-  
-  if(v1D==NULL){
+ 
+
+  if(!v1D){
     lambda_matrix = Array2D(NX+2*NGHOST,NY+2*NGHOST);
     f   = Array2D(dim_max+2*NGHOST,NVAR);
     vl  = Array2D(dim_max+2*NGHOST,NVAR);
@@ -41,10 +42,11 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   double *vrr = &(vr[0][0]);
   double *fnew = &(f[0][0]);
   double *sourcenew = &(source[0][0]);
+  double *lambda_matrix_new = &(lambda_matrix[0][0]);
+
   //double *lambda_mat = &(lambda_matrix[0][0]);
 
   int max_size=(dim_max+2*NGHOST)*NVAR; 
-
   
   //#pragma acc parallel loop private (v1d[:(dim_max+2*NGHOST)*NVAR],vll[:(dim_max+2*NGHOST)*NVAR],vrr[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
   /*
@@ -66,9 +68,8 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
 
   mynvtxstart_("UPDATE",RED);
   mynvtxstart_("X_Cycle UPDATE",BLUE);
-  #pragma acc parallel loop private (v1d[:(dim_max+2*NGHOST)*NVAR],vll[:(dim_max+2*NGHOST)*NVAR],vrr[:(dim_max+2*NGHOST)*NVAR],fnew[:(dim_max+2*NGHOST)*NVAR],sourcenew[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
+  #pragma acc parallel loop private (lambda,v1d[:(dim_max+2*NGHOST)*NVAR],vll[:(dim_max+2*NGHOST)*NVAR],vrr[:(dim_max+2*NGHOST)*NVAR],fnew[:(dim_max+2*NGHOST)*NVAR],sourcenew[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
   for(j = jbeg; j <= jend; j++){
-
     #pragma acc loop vector collapse(2)
     for(i = 0; i < iend+NGHOST; i++){
       for(nv = 0; nv < NVAR; nv++) v1d[i*NVAR+nv] = V[i][j][nv];
@@ -83,11 +84,14 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   for(i=ibeg;i<= iend+1; i++){
    // lambda = riemannLF (vl[i] , vr[i] ,  f[i] , IDIR);
     //#pragma acc loop seq
-    lambda = riemannLF (&vll[i*NVAR], &vrr[i*NVAR] , &fnew[i*NVAR], IDIR);
+    
+    lambda = riemannLF (&vll[i*NVAR], &vrr[i*NVAR] , &fnew[i*NVAR], IDIR, i);
     lambda_matrix[i][j] = lambda /dx;
+    //lambda_matrix_new[(i*dim_max+2*NGHOST)+j] = lambda / dx;
     //printf("lambda_max[%d][%d]  = %f: \n", i,j,lambda_matrix[i][j]);
   }
-    
+  #pragma acc wait
+  // #pragma acc wait
   // riemannHLLC(vl,vr,f,ibeg,iend+1,0); 
   // debug_flag = simmetry1DCheck(f,ibeg,iend);
     // j is fixed outside cycle. dt is in RK
@@ -110,7 +114,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
         #endif
       }
     #endif
-
+  
     #pragma acc loop vector collapse(2)
     for(i = ibeg; i <= iend; i++){     
       for(nv = 0; nv < NVAR;nv++){
@@ -160,15 +164,18 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
       
     #pragma acc loop vector
     for(j=0;j<= jend+1; j++){
-      //      lambda = riemannLF (  vl[j] , vr[j] ,  f[j] , JDIR);
       //#pragma acc loop seq
-      lambda = riemannLF (&vll[j*NVAR] , &vrr[j*NVAR] , &fnew[j*NVAR], JDIR);
+      //lambda = riemannLF (  vl[j] , vr[j] ,  f[j] , JDIR);
+      lambda = riemannLF (&vll[j*NVAR] , &vrr[j*NVAR] , &fnew[j*NVAR], JDIR,j);
       #if DIMENSION == DIMX2
         lambda_matrix[i][j] = lambda / dy;
+        //lambda_matrix_new[(j*dim_max+2*NGHOST)+i] = lambda / dy;
       #else
         lambda_matrix[i][j] += lambda / dy;
+        //lambda_matrix_new[(j*dim_max+2*NGHOST)+i] += lambda / dy;
       #endif
     }
+    #pragma acc wait
        
 //    riemannHLLC(vl, vr, f, jbeg, jend+1, 1);
 //    debug_flag = simmetry1DCheck(f,jbeg,jend);
@@ -226,11 +233,11 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   #if DIMENSIONS == DIMX2 
   dx = dy;
   #endif
-
   lambda_max = 0.0;
-  for(int i = ibeg;i<=iend;i++){
-    for(int j=jbeg; j<= jend; j++)
-    lambda_max = MAX(lambda_matrix[i][j],lambda_max);
+  for(int j = jbeg; j<=jend; j++){
+    for(int i=ibeg; i<= iend; i++) 
+      //lambda_max = MAX(lambda_matrix_new[(i*dim_max+2*NGHOST)+j],lambda_max);
+      lambda_max = MAX(lambda_matrix[i][j],lambda_max);
   }
   dxyzmax = MAX(dx,dy);
   dt = (double)CFL* DIMENSIONS/lambda_max;

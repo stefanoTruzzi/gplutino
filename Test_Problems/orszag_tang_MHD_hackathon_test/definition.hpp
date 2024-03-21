@@ -4,6 +4,9 @@
 #define BOUND  PERIODIC
 /* cna be 1 or 2*/
 #define ORDER     2
+#define LIMITER LIM_VANLEER
+
+#define GAMMA_EOS 5.0/3.0
 
 /* X GRID */
 #define XBEG      0.0
@@ -13,19 +16,17 @@
 #define YEND      1.0
 
 /* grid dimensiones */
-#define NX        512
-#define NY        512
+#define NX        1024
+#define NY        1024
 
 #define CFL 0.4 //MAX 0.4 for 2D application
 
 /* TIME */
 #define TSTART    1e-4
-#define TSTOP     3.1000001 //3.2
+#define TSTOP     0.5
 
 /* INNER OUTPUT (put 0 if you want only first and last)*/
-#define NOUTPUT   50
-
-#define GAMMA_EOS (5.0/3.0)  /* Specific heat ratio */
+#define NOUTPUT   0
 
 /* PHYSICS definition. */
 /* IDEALMHD or HD */
@@ -36,6 +37,7 @@
 /* ONLY DIMX2 to test the software only in Y direction (1D) */
 /* DIM_2D to launch the software with both X and Y */
 #define DIMENSIONS DIM_2D
+//#define DIMENSIONS DIMX1  
 
 /* VARIABLES DEFINITION ********************************************* */
 #if PHYSICS == HD
@@ -63,3 +65,4 @@
 #endif
 /* ****************************************************************** */
 
+#define _USE_NVTX

@@ -2,20 +2,30 @@
 
 
 /* ********************************************************************* */
-double riemannLF(double *vl, double *vr, double *f, int direction)
+double riemannLF(double *vl, double *vr, double *f, int direction, int index)
 /*  f_index e' l indice della riga che viene passato
  *
  *********************************************************************** */
-{
+{ 
   double ul[NVAR], ur[NVAR];
   double sourcel[NVAR], sourcer[NVAR];
   double fl[NVAR], fr[NVAR];
   double lambda_max;
 
+  /*
+  static double *ul,*ur,*fl,*fr;
+  #pragma acc declare create(ul, ur, fl, fr)
+  if(ul==NULL){
+    ul = Array1D(NVAR);
+    ur = Array1D(NVAR);
+    fl = Array1D(NVAR);
+    fr = Array1D(NVAR);
+  }
+  */
   //calcolo ul che mi servira' per aggiornare i flussi
   // ognu ul ha 4 componenti le calcolo fuori dato che sono tutte diverse
   
-  //#pragma acc loop seq
+  //#pragma acc loop seql
   prim_to_cons(vl,ul);
   //#pragma acc loop seq
   prim_to_cons(vr,ur);
@@ -25,7 +35,7 @@ double riemannLF(double *vl, double *vr, double *f, int direction)
   flux_single(vl, ul, fl);
   //#pragma acc loop seq
   flux_single(vr, ur, fr);
-
+  
   #pragma acc loop seq
   for(int nv = 0; nv < NVAR; nv++){
     f[nv] = 0.5*(fl[nv]+fr[nv]) - 0.5*lambda_max*(ur[nv]-ul[nv]);  
@@ -33,7 +43,7 @@ double riemannLF(double *vl, double *vr, double *f, int direction)
   //Show1DArray(f[i]);
   
   //printf(" %f \t", lambda_max);
-
+  
   return(lambda_max);
 }
 
