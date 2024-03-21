@@ -68,7 +68,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
 
   mynvtxstart_("UPDATE",RED);
   mynvtxstart_("X_Cycle UPDATE",BLUE);
-  #pragma acc parallel loop private (lambda,v1d[:(dim_max+2*NGHOST)*NVAR],vll[:(dim_max+2*NGHOST)*NVAR],vrr[:(dim_max+2*NGHOST)*NVAR],fnew[:(dim_max+2*NGHOST)*NVAR],sourcenew[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
+  #pragma acc parallel loop private (v1d[:(dim_max+2*NGHOST)*NVAR],vll[:(dim_max+2*NGHOST)*NVAR],vrr[:(dim_max+2*NGHOST)*NVAR],fnew[:(dim_max+2*NGHOST)*NVAR],sourcenew[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
   for(j = jbeg; j <= jend; j++){
     #pragma acc loop vector collapse(2)
     for(i = 0; i < iend+NGHOST; i++){
