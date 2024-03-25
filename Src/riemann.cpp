@@ -41,9 +41,8 @@ double riemannLF(double *vl, double *vr, double *f, int direction, int index)
     f[nv] = 0.5*(fl[nv]+fr[nv]) - 0.5*lambda_max*(ur[nv]-ul[nv]);  
   }
   //Show1DArray(f[i]);
-  
-  //printf(" %f \t", lambda_max);
-  
+  //printf( "INDEX %d\n",index);
+  //printf("LAMBDA %f\n", lambda_max);  
   return(lambda_max);
 }
 

@@ -19,8 +19,10 @@ double ***Array3D (int nx, int ny, int nz)
   double ***m;
 
   m = (double ***) malloc ( nx*sizeof (double **));
+  #pragma acc enter data create (m[:nx])
 
   m[0] = (double **) malloc ( nx*ny* sizeof(double *));  
+
 
   m[0][0] = (double *) malloc ( nx*ny*nz* sizeof(double));
 

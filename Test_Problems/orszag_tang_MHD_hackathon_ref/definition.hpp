@@ -1,3 +1,4 @@
+
 /* can be POWELL or NOSOURCE*/
 #define SOURCE POWELL
 /* can be PERIODIC or OUTFLOW*/
@@ -65,4 +66,6 @@
 #endif
 /* ****************************************************************** */
 
+#ifndef _USE_NVTX
 #define _USE_NVTX
+#endif
