@@ -15,6 +15,7 @@
 #include "structs.hpp"
 #include "prototypes.hpp"
 
+
 extern int VXn, VXt, VXb;
 #pragma acc declare create (VXn,VXt,VXb)
 extern int MXn, MXt, MXb;

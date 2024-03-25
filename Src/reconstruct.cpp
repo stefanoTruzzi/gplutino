@@ -13,7 +13,7 @@ int reconstruct(double *v,double *vl, double *vr, int ibeg, int iend)
 
 
 
-  #if ORDER == 1
+  #if ORDER == 2
 
   #pragma acc loop vector collapse(2)
   for(int i = ibeg; i <= iend;i++){
@@ -25,7 +25,7 @@ int reconstruct(double *v,double *vl, double *vr, int ibeg, int iend)
     }
   }
   
-  #elif ORDER == 2
+  #elif ORDER == 1
   
   #pragma acc loop vector collapse(2)
 
@@ -37,8 +37,8 @@ int reconstruct(double *v,double *vl, double *vr, int ibeg, int iend)
       //slope_next = v[i+1][nv]     - v[i][nv];
       slope_next =  v[(i+1)*NVAR+nv]-v[(i)*NVAR+nv];
       //slope_prev = v[i][nv]     -  v[i-1][nv];
-      slope_prev = v[(i)*NVAR+nv] - v[(i-1)*NVAR+nv];;
-      
+      slope_prev = v[(i)*NVAR+nv] - v[(i-1)*NVAR+nv];
+
       #if LIMITER == LIM_MINMOD
         if( slope_next * slope_prev > 0.0){ 
           if(fabs(slope_next) < fabs(slope_prev)) slope_best = slope_next;

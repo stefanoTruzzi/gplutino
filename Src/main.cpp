@@ -1,5 +1,4 @@
 #include "plutino.hpp"
-#include "globals.hpp"
 
 /* TODO */
 /* 
@@ -9,12 +8,17 @@
   4 - test 
 */
 
+
+
+
 /* ********************************************************************* */
 int main()
 /* 
  *    
  *
  *********************************************************************** */
+
+
 {
   /* variables initialization
      can be move to another file called init?  

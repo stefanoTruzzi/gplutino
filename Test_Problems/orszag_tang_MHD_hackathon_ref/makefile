@@ -9,9 +9,9 @@ plutino:                              # Default target
 #ARCH         = Linux.gcc.defs
 
 CC      = nvc++
-CFLAGS  = -c -O3 -cudalib=nvtx3 -D_USE_NVTX -acc -Minfo=accel -gpu=lineinfo,managed --diag_suppress=hidden_by_old_for_init,declared_but_not_referenced,set_but_not_used
+CFLAGS  = -c -O3 -cudalib=nvtx3 -D_USE_NVTX -acc -Minfo=accel -gpu=lineinfo,managed,rdc --diag_suppress=hidden_by_old_for_init,declared_but_not_referenced,set_but_not_used
 #CFLAGS = -O3 -cudalib=nvtx3 -c -acc=multicore 
-LDFLAGS = -lm -cudalib=nvtx3 -gpu=managed -acc #-acc=multicore
+LDFLAGS = -lm -cudalib=nvtx3 -gpu=managed,rdc -acc #-acc=multicore
 
 #PLUTINO_DIR    = /home/truzzi/gplutino
 SRC          = $(PLUTINO_DIR)/Src
@@ -25,7 +25,7 @@ VPATH        = ./:$(SRC)
 # ---------------------------------------------------------
 
 HEADERS = plutino.hpp prototypes.hpp macro.hpp definition.hpp structs.hpp
-OBJ = main.o initial_conditions.o arrays.o boundary.o \
+OBJ = main.o initial_conditions.o arrays.o globals.o boundary.o \
 			cons_to_prim.o debug.o flux.o input_output.o \
 			reconstruct.o riemann.o rungekutta.o set_indexes.o \
 			source.o update.o wave_speed.o nvtx.o

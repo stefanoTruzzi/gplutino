@@ -67,8 +67,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     }}
   */
  
-  printf("%d \n",(dim_max+2*NGHOST)*NVAR);
-  printf("%d \n",NVAR+(iend+NGHOST)*NVAR);
+  printf("UPDATE \n");
 
   //#pragma acc data copyin (V[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copy(R[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copyout(lambda_matrix[:NX+2*NGHOST][:NY+2*NGHOST])
   //{
@@ -104,14 +103,13 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     for(int i = ibeg; i<= iend+1 ; i++)  
       Bn[i] = 0.5 * (vll[i*NVAR+BXn] + vrr[i*NVAR+BXn]);
 
-
     #pragma acc loop vector
     for(int i = ibeg ; i<= iend; i++){
       divB[i] = (Bn[i+1] - Bn[i]) / dx; 
       powell_source(&v1d[i*NVAR],&sourcenew[i*NVAR],divB[i]);
 
       if(i == 30 && j == 30 )
-      printf("vll[BXn] %f - vrr[B]%f\n",vll[i*NVAR+BXn] ,vrr[i*NVAR+BXn]);
+      printf("vll[BXn] %f - vrr[BXn] %f\n",vll[i*NVAR+BXn] ,vrr[i*NVAR+BXn]);
 
       #ifdef DEBUG_DIVB
       divB_max = MAX(divB_max, divB[i]);
@@ -128,7 +126,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
           R[i][j][nv] += sourcenew[(i)*NVAR+nv];
           #endif
                       if(i == 30 && j == 30 )
-      printf("SOURCE %f - %f\n",R[i][j][nv], sourcenew[(i)*NVAR+nv]);
+      printf("R --- SOURCE %f - %f\n",R[i][j][nv], sourcenew[(i)*NVAR+nv]);
         }
     }
   }
