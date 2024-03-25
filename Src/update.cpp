@@ -70,13 +70,15 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   printf("%d \n",(dim_max+2*NGHOST)*NVAR);
   printf("%d \n",NVAR+(iend+NGHOST)*NVAR);
 
-  #pragma acc data copyin (V[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copy(R[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copyout(lambda_matrix[:NX+2*NGHOST][:NY+2*NGHOST])
-  {
+  //#pragma acc data copyin (V[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copy(R[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copyout(lambda_matrix[:NX+2*NGHOST][:NY+2*NGHOST])
+  //{
   #pragma acc parallel loop private (divB[:(iend+1)],Bn[:iend+2],v1d[:(dim_max+2*NGHOST)*NVAR], vll[:(dim_max+2*NGHOST)*NVAR] , vrr[:(dim_max+2*NGHOST)*NVAR], fnew[:(dim_max+2*NGHOST)*NVAR], sourcenew[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
   for(j = jbeg; j <= jend; j++){
     #pragma acc loop vector collapse(2)
     for(i = 0; i < iend+NGHOST; i++){
-       for(nv = 0; nv < NVAR; nv++) v1d[i*NVAR+nv] = V[i][j][nv];
+       for(nv = 0; nv < NVAR; nv++){ v1d[i*NVAR+nv] = V[i][j][nv];
+       if(i == 30 && j == 30)
+        printf("v1d[rho] %f , v1d[vx1] %f , v1d[vx2] %f\n",v1d[i*NVAR+0],v1d[i*NVAR+1],v1d[i*NVAR+2]);}
     }
     /*
     for(j=jbeg;j<=jend ; j++){
@@ -90,7 +92,9 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
         
     #pragma acc loop vector
     for(i=ibeg;i<= iend+1; i++){
-      lambda = riemannLF (&vll[i*NVAR], &vrr[i*NVAR] , &fnew[i*NVAR], IDIR, i);
+      double lambda = riemannLF (&vll[i*NVAR], &vrr[i*NVAR] , &fnew[i*NVAR], IDIR, i);
+      if(i == 30 && j == 30)
+      printf("lambda %f , vrr[BXn] %f , vll[BXn] %f\n",lambda,vrr[i*NVAR+BXn],vll[i*NVAR+BXn]);
       lambda_matrix[i][j] = lambda /dx;
     } 
 
@@ -99,12 +103,15 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     #pragma acc loop vector
     for(int i = ibeg; i<= iend+1 ; i++)  
       Bn[i] = 0.5 * (vll[i*NVAR+BXn] + vrr[i*NVAR+BXn]);
-    
+
 
     #pragma acc loop vector
     for(int i = ibeg ; i<= iend; i++){
       divB[i] = (Bn[i+1] - Bn[i]) / dx; 
       powell_source(&v1d[i*NVAR],&sourcenew[i*NVAR],divB[i]);
+
+      if(i == 30 && j == 30 )
+      printf("vll[BXn] %f - vrr[B]%f\n",vll[i*NVAR+BXn] ,vrr[i*NVAR+BXn]);
 
       #ifdef DEBUG_DIVB
       divB_max = MAX(divB_max, divB[i]);
@@ -120,6 +127,8 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
           #if SOURCE == POWELL
           R[i][j][nv] += sourcenew[(i)*NVAR+nv];
           #endif
+                      if(i == 30 && j == 30 )
+      printf("SOURCE %f - %f\n",R[i][j][nv], sourcenew[(i)*NVAR+nv]);
         }
     }
   }
@@ -161,7 +170,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     
     #pragma acc loop vector
     for(j=0;j<= jend+1; j++){
-      lambda = riemannLF (&vll[j*NVAR] , &vrr[j*NVAR] , &fnew[j*NVAR], JDIR,j);
+      double lambda = riemannLF (&vll[j*NVAR] , &vrr[j*NVAR] , &fnew[j*NVAR], JDIR,j);
       #if DIMENSION == DIMX2
         lambda_matrix[i][j] = lambda / dy;
       #else
@@ -187,6 +196,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   #pragma acc loop vector collapse(2)
     for(j = jbeg; j <= jend; j++){
       for(nv = 0; nv < NVAR; nv++){
+
         #if DIMENSIONS == DIMX2
           R[i][j][nv] =  -(fnew[(j+1)*NVAR+nv] - fnew[(j)*NVAR+nv])/dy; 
         #else
@@ -195,10 +205,12 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
             R[i][j][nv] += sourcenew[(j)*NVAR+nv];
           #endif
         #endif
+
       }
+
     }
   }
-}
+//}
   #endif
   mynvtxstop_();
   mynvtxstop_();

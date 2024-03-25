@@ -9,8 +9,9 @@ plutino:                              # Default target
 #ARCH         = Linux.gcc.defs
 
 CC      = nvc++
-CFLAGS  = -c -O3 -cudalib=nvtx3 -D_USE_NVTX -acc -Minfo=accel -gpu=lineinfo,managed
-LDFLAGS = -lm -cudalib=nvtx3 -acc -gpu=managed
+CFLAGS  = -c -O3 -cudalib=nvtx3 -D_USE_NVTX -acc -Minfo=accel -gpu=lineinfo,managed --diag_suppress=hidden_by_old_for_init,declared_but_not_referenced,set_but_not_used
+#CFLAGS = -O3 -cudalib=nvtx3 -c -acc=multicore 
+LDFLAGS = -lm -cudalib=nvtx3 -gpu=managed -acc #-acc=multicore
 
 #PLUTINO_DIR    = /home/truzzi/gplutino
 SRC          = $(PLUTINO_DIR)/Src

@@ -7,9 +7,9 @@ int reconstruct(double *v,double *vl, double *vr, int ibeg, int iend)
  *
  *********************************************************************** */
 {
-  double slope_best;
-  double slope_next;
-  double slope_prev;
+  //double slope_best;
+  //double slope_next;
+  //double slope_prev;
 
 
 
@@ -19,7 +19,7 @@ int reconstruct(double *v,double *vl, double *vr, int ibeg, int iend)
   for(int i = ibeg; i <= iend;i++){
     for(int nv = 0; nv<NVAR;nv++){   
       //vl[i+1][nv]= v[i][nv]; old
-      vl[(i+1)*NVAR+nv] = v[(i+1)*NVAR+nv];
+      vl[(i+1)*NVAR+nv] = v[(i)*NVAR+nv];
       //vr[i][nv]  = v[i][nv]; old
       vr[(i)*NVAR+nv] = v[(i)*NVAR+nv];
     }
@@ -28,8 +28,12 @@ int reconstruct(double *v,double *vl, double *vr, int ibeg, int iend)
   #elif ORDER == 2
   
   #pragma acc loop vector collapse(2)
+
   for(int i = ibeg; i <=iend;i++){
     for(int nv = 0; nv<NVAR;nv++){
+      double slope_best;
+      double slope_next;
+      double slope_prev;
       //slope_next = v[i+1][nv]     - v[i][nv];
       slope_next =  v[(i+1)*NVAR+nv]-v[(i)*NVAR+nv];
       //slope_prev = v[i][nv]     -  v[i-1][nv];

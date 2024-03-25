@@ -28,20 +28,26 @@ void SetVectorIndices (int dir)
     VXn = MXn = VX1;
     VXt = MXt = VX2;
     VXb = MXb = VX3;
+    #pragma acc update device(VXn, VXt, VXb, MXn, MXt, MXb)
     #if (PHYSICS == IDEALMHD)
     BXn = BX1; 
     BXt = BX2; 
     BXb = BX3;
+    #pragma acc update device(BXn, BXt, BXb)
+
     #endif
   }else if (dir == JDIR){ /* -- Order: Y-Z-X  -- */
     VXn = MXn = VX2;
     VXt = MXt = VX3;
     VXb = MXb = VX1;
+    #pragma acc update device(VXn, VXt, VXb, MXn, MXt, MXb)
 
     #if (PHYSICS == IDEALMHD)
     BXn = BX2;
     BXt = BX3;
     BXb = BX1;
+    #pragma acc update device(BXn, BXt, BXb)
+
     #endif
 
   }else if (dir == KDIR){ /* -- Order: Z-X-Y   -- */
@@ -49,11 +55,15 @@ void SetVectorIndices (int dir)
     VXn = MXn = VX3;
     VXt = MXt = VX1;
     VXb = MXb = VX2;
+    #pragma acc update device(VXn, VXt, VXb, MXn, MXt, MXb)
+
 
     #if (PHYSICS == IDEALMHD)
     BXn = BX3;
     BXt = BX1;
     BXb = BX2;
+    #pragma acc update device(BXn, BXt, BXb)
+
     #endif
 
   }
