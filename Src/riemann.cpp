@@ -2,7 +2,7 @@
 
 
 /* ********************************************************************* */
-double riemannLF(double *vl, double *vr, double *f, int direction, int index)
+double riemannLF(double *vl, double *vr, double *f, int direction, int index, Indices &indices)
 /*  f_index e' l indice della riga che viene passato
  *
  *********************************************************************** */
@@ -30,11 +30,11 @@ double riemannLF(double *vl, double *vr, double *f, int direction, int index)
   //#pragma acc loop seq
   prim_to_cons(vr,ur);
   //#pragma routine seq
-  lambda_max = MaxSignalSpeedlr(vl,vr);
+  lambda_max = MaxSignalSpeedlr(vl,vr,indices);
   //#pragma routine seq
-  flux_single(vl, ul, fl);
+  flux_single(vl, ul, fl, indices);
   //#pragma acc loop seq
-  flux_single(vr, ur, fr);
+  flux_single(vr, ur, fr, indices);
   
   #pragma acc loop seq
   for(int nv = 0; nv < NVAR; nv++){
@@ -48,6 +48,7 @@ double riemannLF(double *vl, double *vr, double *f, int direction, int index)
 
 int riemannHLLC(double **vl, double **vr, double **f, int ibeg, int iend, int direction)
 { 
+#if 0
   //int    VXn = VX1 + direction;
   //int    MXn = MX1 + direction;
 
@@ -63,8 +64,8 @@ int riemannHLLC(double **vl, double **vr, double **f, int ibeg, int iend, int di
   for(int i = ibeg ; i<= iend; i++){
     prim_to_cons (vl[i],ul);
     prim_to_cons (vr[i],ur);
-    flux_single (vl[i], ul, fl);
-    flux_single (vr[i], ur, fr);
+    flux_single (vl[i], ul, fl, indices);
+    flux_single (vr[i], ur, fr, indices);
 
     cl = sqrt(GAMMA_EOS*vl[i][PRS]/vl[i][RHO]);
     cr = sqrt(GAMMA_EOS*vr[i][PRS]/vr[i][RHO]);
@@ -111,6 +112,6 @@ int riemannHLLC(double **vl, double **vr, double **f, int ibeg, int iend, int di
     }
     //printf ("flux(%d) = ",i); Show1DArray(f[i]);
   }
-
+#endif
   return(0);
 }

@@ -15,17 +15,6 @@
 #include "structs.hpp"
 #include "prototypes.hpp"
 
-
-extern int VXn, VXt, VXb;
-#pragma acc declare create (VXn,VXt,VXb)
-extern int MXn, MXt, MXb;
-#pragma acc declare create (MXn,MXt,MXb)
-extern int BXn, BXt, BXb;
-#pragma acc declare create (BXn,BXt,BXb)
-extern int EXn, EXt, EXb;
-#pragma acc declare create (EXn,EXt,BXb)
-
-
 #define GREEN (0x0000FF00)
 #define BLUE (0x000000FF)
 #define YELLOW (0x00FFFF00)

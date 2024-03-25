@@ -2,7 +2,7 @@
 
 
 /* ********************************************************************* */
-double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, int jbeg, int jend, double dx, double dy)
+double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, int jbeg, int jend, double dx, double dy, Indices &indices)
 /* 
  *********************************************************************** */
 { 
@@ -35,7 +35,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
 
   #if (DIMENSIONS == DIMX1) || (DIMENSIONS == DIM_2D) 
   // Start of x-direction R cycle
-  SetVectorIndices(IDIR);
+  indices.SetVectorIndices(IDIR);
 
   double *v1d = &(v1D[0][0]);
   double *vll = &(vl[0][0]);
@@ -91,9 +91,9 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
         
     #pragma acc loop vector
     for(i=ibeg;i<= iend+1; i++){
-      double lambda = riemannLF (&vll[i*NVAR], &vrr[i*NVAR] , &fnew[i*NVAR], IDIR, i);
+      double lambda = riemannLF (&vll[i*NVAR], &vrr[i*NVAR] , &fnew[i*NVAR], IDIR, i, indices);
       if(i == 30 && j == 30)
-      printf("lambda %f , vrr[BXn] %f , vll[BXn] %f\n",lambda,vrr[i*NVAR+BXn],vll[i*NVAR+BXn]);
+      printf("lambda %f , vrr[BXn] %f , vll[BXn] %f\n",lambda,vrr[i*NVAR+indices.BXn],vll[i*NVAR+indices.BXn]);
       lambda_matrix[i][j] = lambda /dx;
     } 
 
@@ -101,7 +101,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
 
     #pragma acc loop vector
     for(int i = ibeg; i<= iend+1 ; i++)  
-      Bn[i] = 0.5 * (vll[i*NVAR+BXn] + vrr[i*NVAR+BXn]);
+      Bn[i] = 0.5 * (vll[i*NVAR+indices.BXn] + vrr[i*NVAR+indices.BXn]);
 
     #pragma acc loop vector
     for(int i = ibeg ; i<= iend; i++){
@@ -109,7 +109,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
       powell_source(&v1d[i*NVAR],&sourcenew[i*NVAR],divB[i]);
 
       if(i == 30 && j == 30 )
-      printf("vll[BXn] %f - vrr[BXn] %f\n",vll[i*NVAR+BXn] ,vrr[i*NVAR+BXn]);
+      printf("vll[BXn] %f - vrr[BXn] %f\n",vll[i*NVAR+indices.BXn] ,vrr[i*NVAR+indices.BXn]);
 
       #ifdef DEBUG_DIVB
       divB_max = MAX(divB_max, divB[i]);
@@ -149,7 +149,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   // Start of y-direction R cycle
   // same of x-direction but with -= instead of =
     
-  SetVectorIndices(JDIR);
+  indices.SetVectorIndices(JDIR);
   
   mynvtxstart_("Y_Cycle UPDATE",CYAN);
   #pragma acc parallel loop private (divB[:(jend+1)],Bn[:jend+2],v1d[:(dim_max+2*NGHOST)*NVAR], vll[:(dim_max+2*NGHOST)*NVAR] , vrr[:(dim_max+2*NGHOST)*NVAR], fnew[:(dim_max+2*NGHOST)*NVAR], sourcenew[:(dim_max+2*NGHOST)*NVAR])//takes the next loop (j) and divide it over SM and Threads 
@@ -168,7 +168,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     
     #pragma acc loop vector
     for(j=0;j<= jend+1; j++){
-      double lambda = riemannLF (&vll[j*NVAR] , &vrr[j*NVAR] , &fnew[j*NVAR], JDIR,j);
+      double lambda = riemannLF (&vll[j*NVAR] , &vrr[j*NVAR] , &fnew[j*NVAR], JDIR,j, indices);
       #if DIMENSION == DIMX2
         lambda_matrix[i][j] = lambda / dy;
       #else
@@ -179,7 +179,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     #if SOURCE == POWELL
       #pragma acc loop vector
       for(int j = jbeg; j<= jend+1 ; j++)
-        Bn[j] = 0.5 * (vll[j*NVAR+BXn] + vrr[j*NVAR+BXn]);
+        Bn[j] = 0.5 * (vll[j*NVAR+indices.BXn] + vrr[j*NVAR+indices.BXn]);
       #pragma acc loop vector
       for(int j = jbeg ; j<= jend; j++){
         divB[j] = (Bn[j+1] - Bn[j]) / dy; 

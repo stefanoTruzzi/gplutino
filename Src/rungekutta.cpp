@@ -1,7 +1,7 @@
 #include "plutino.hpp"
 
 
-double rk_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int jbeg, int jend, double dx, double dy)
+double rk_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int jbeg, int jend, double dx, double dy, Indices &indices)
 {
 	static double ***R;
   double dt;
@@ -10,7 +10,7 @@ double rk_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int
   }
 
   boundary_conditions(V,ibeg,iend,jbeg,jend); //gli passo il 3d tutto intero e ne faccio 4 dentro 
-  dt = update(datainfo, V, R, ibeg, iend, jbeg, jend, dx,dy); //gli passo il 3d
+  dt = update(datainfo, V, R, ibeg, iend, jbeg, jend, dx,dy, indices); //gli passo il 3d
   for(int i= ibeg; i <= iend; i++){
   for(int j= jbeg; j <= jend; j++){
 		for(int nvar = 0; nvar < NVAR; nvar++){
@@ -21,7 +21,7 @@ double rk_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int
   return (dt);
 }
 
-double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int jbeg, int jend, double dx, double dy)
+double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int jbeg, int jend, double dx, double dy, Indices &indices)
 {	
 	static double ***R, ***R1, ***U1, ***V1;
   double dt;
@@ -34,7 +34,7 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
     }
     
 	boundary_conditions(V,ibeg,iend,jbeg,jend);
-  dt = update(datainfo, V, R, ibeg, iend, jbeg, jend, dx,dy); //gli passo il 3d
+	dt = update(datainfo, V, R, ibeg, iend, jbeg, jend, dx,dy, indices); //gli passo il 3d
 	//calcolo R e poi aggiorno U
 	// U1 = U+ dt*R1
   
@@ -48,7 +48,7 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
   }}
   mynvtxstop_();
   boundary_conditions(V1,ibeg,iend,jbeg,jend);
-  update(datainfo, V1,R1, ibeg, iend, jbeg, jend, dx, dy);
+  update(datainfo, V1,R1, ibeg, iend, jbeg, jend, dx, dy, indices);
     
   mynvtxstart_("RK update STAGE 2", ORANGE);
   for(int i= ibeg; i <= iend; i++){
@@ -64,7 +64,7 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
 	return (dt);
 }
 
-double rk3_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int jbeg, int jend, double dx, double dy){
+double rk3_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,int jbeg, int jend, double dx, double dy, Indices &indices){
 	
 	static double ***R, ***R1, ***U1, ***V1, ***R2, ***U2;
   double dt; 
@@ -79,7 +79,7 @@ double rk3_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
   }
 
 	boundary_conditions(V,ibeg,iend,jbeg,jend);
-  dt = update(datainfo, V, R, ibeg, iend, jbeg, jend, dx,dy); //gli passo il 3d
+	dt = update(datainfo, V, R, ibeg, iend, jbeg, jend, dx,dy, indices); //gli passo il 3d
 	//calcolo R e poi aggiorno U
 	// U1 = U+ dt*R1
 	for(int i= ibeg; i <= iend; i++){
@@ -91,7 +91,7 @@ double rk3_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
   }}
 
   boundary_conditions(V1,ibeg,iend,jbeg,jend);
-  update(datainfo, V1,R1, ibeg, iend, jbeg, jend, dx, dy);
+  update(datainfo, V1,R1, ibeg, iend, jbeg, jend, dx, dy, indices);
   for(int i= ibeg; i <= iend; i++){
   for(int j= ibeg; j <= jend; j++){
 		for(int nvar = 0; nvar < NVAR; nvar++){
@@ -101,7 +101,7 @@ double rk3_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
   }}
 
   boundary_conditions(V1,ibeg,iend,jbeg,jend);
-  update(datainfo, V1,R2, ibeg, iend, jbeg, jend, dx, dy);
+  update(datainfo, V1,R2, ibeg, iend, jbeg, jend, dx, dy, indices);
   for(int i= ibeg; i <= iend; i++){
   for(int j= ibeg; j <= jend; j++){
 		for(int nvar =0; nvar < NVAR; nvar++){

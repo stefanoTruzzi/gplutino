@@ -1,5 +1,5 @@
 #include "plutino.hpp"
-
+#include "set_indexes.hpp"
 /* TODO */
 /* 
   1 - print TIME FOR HACKATHON
@@ -87,6 +87,8 @@ int main()
   mynvtxstart_("Time cycle",GREEN);
   time_t start_time_cycle;
   time(&start_time_cycle);   // get current time.
+  Indices indices;
+#pragma acc enter data copyin(indices)
   while (t <= tstop){
     // calculation of max speed (lambda max)
     // print values in file
@@ -96,12 +98,12 @@ int main()
     }
     /* RK ORDER (3 did not work for now)*/
     #if ORDER == 1
-    dt = rk_step (datainfo, U, V, ibeg, iend, jbeg, jend, dx, dy);
+    dt = rk_step (datainfo, U, V, ibeg, iend, jbeg, jend, dx, dy, indices);
     #elif ORDER == 2
-    dt = rk2_step(datainfo, U, V, ibeg, iend, jbeg, jend, dx, dy);
+    dt = rk2_step(datainfo, U, V, ibeg, iend, jbeg, jend, dx, dy, indices);
     #elif ORDER == 3  
     /* NOT WORK FOR NOW! */
-    dt = rk3_step(datainfo, U, V, ibeg, iend, jbeg, jend, dx, dy);
+    dt = rk3_step(datainfo, U, V, ibeg, iend, jbeg, jend, dx, dy, indices);
     #else
       #error Invalid order
     #endif
@@ -111,6 +113,7 @@ int main()
     nstep++;
     t=t+dt;
   }
+#pragma acc exit data delete(indices)
   time_t stop_time_cycle;
   time(&stop_time_cycle);   // get current time after time pass.
   double diff_t = difftime(stop_time_cycle, start_time_cycle);

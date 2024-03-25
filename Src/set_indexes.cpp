@@ -13,9 +13,11 @@
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "plutino.hpp"
+#include "set_indexes.hpp"
+
 
 /* ********************************************************************* */
-void SetVectorIndices (int dir)
+void Indices::SetVectorIndices (int dir)
 /*!
  * Set vector indices and integration index range.
  *

@@ -1,7 +1,7 @@
 #include "plutino.hpp"
 
 
-double MaxSignalSpeedlr(double *vl, double *vr)
+double MaxSignalSpeedlr(double *vl, double *vr, Indices &indices)
 {
   int i; 
   double cl, cr, lambda_max;
@@ -10,8 +10,8 @@ double MaxSignalSpeedlr(double *vl, double *vr)
   cr = sqrt(GAMMA_EOS*vr[PRS]/vr[RHO]);  
       
   #if PHYSICS == HD
-    lambda_l = fabs(vl[VXn]);
-    lambda_r = fabs(vr[VXn]);
+    lambda_l = fabs(vl[indices.VXn]);
+    lambda_r = fabs(vr[indices.VXn]);
     lambda_max = MAX(lambda_l + cl, lambda_r + cr);
   #endif
 
@@ -23,11 +23,11 @@ double MaxSignalSpeedlr(double *vl, double *vr)
     var = (b2r/vr[RHO]);
     alfcl  = cl*cl + val;
     alfcr  = cr*cr + var; 
-    normcl = 4.0*cl*cl*vl[BXn]*vl[BXn]/(vl[RHO]);
-    normcr = 4.0*cr*cr*vr[BXn]*vr[BXn]/(vr[RHO]);
+    normcl = 4.0*cl*cl*vl[indices.BXn]*vl[indices.BXn]/(vl[RHO]);
+    normcr = 4.0*cr*cr*vr[indices.BXn]*vr[indices.BXn]/(vr[RHO]);
     lambda_l = sqrt(0.5*(alfcl + sqrt((alfcl*alfcl) - normcl)));
     lambda_r = sqrt(0.5*(alfcr + sqrt((alfcr*alfcr) - normcr)));
-    lambda_max=MAX(fabs(vl[VXn])+lambda_l,fabs(vr[VXn])+lambda_r);
+    lambda_max=MAX(fabs(vl[indices.VXn])+lambda_l,fabs(vr[indices.VXn])+lambda_r);
 
   #endif
   return (lambda_max);

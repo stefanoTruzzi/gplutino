@@ -1,3 +1,5 @@
+#include "set_indexes.hpp"
+
 /* arrays.cpp ********************************************************** */
 double **Array2D (int, int);
 double ***Array3D (int, int, int);
@@ -24,7 +26,7 @@ int simmetry1DCheck(double **, int , int);
 
 /* flux.cpp ************************************************************ */
 #pragma acc routine seq
-int flux_single(double *, double *, double *);
+int flux_single(double *, double *, double *, Indices &);
 int ustar_single(double *, double *, double *, double, double, int);
 /* ********************************************************************* */
 
@@ -43,35 +45,30 @@ int reconstruct(double *,double *, double *, int, int);
 
 /* riemann.cpp ********************************************************* */
 #pragma acc routine seq
-double riemannLF(double *, double *, double *, int, int);
+double riemannLF(double *, double *, double *, int, int, Indices &);
 int riemannHLLC(double **, double **, double **, int, int, int, double);
 /* ********************************************************************* */
 
 /* rungekutta.cpp ****************************************************** */
-double rk_step (DataInfo&, double ***, double ***, int, int, int, int, double, double);
-double rk2_step(DataInfo&, double ***, double ***, int, int, int, int, double, double);
-double rk3_step(DataInfo&, double ***, double ***, int, int, int, int, double, double);
+double rk_step (DataInfo&, double ***, double ***, int, int, int, int, double, double, Indices &);
+double rk2_step(DataInfo&, double ***, double ***, int, int, int, int, double, double, Indices &);
+double rk3_step(DataInfo&, double ***, double ***, int, int, int, int, double, double, Indices &);
 /* ********************************************************************* */
 
 /* update.cpp ********************************************************** */
-double update(DataInfo&, double ***, double ***, int, int, int, int, double, double);
+double update(DataInfo&, double ***, double ***, int, int, int, int, double, double, Indices &);
 /* ********************************************************************* */
 
 /* wave_speed.cpp ****************************************************** */
 #pragma acc routine seq
 double MaxSignalSpeed(double *);
 #pragma acc routine seq
-double MaxSignalSpeedlr(double *, double *);
+double MaxSignalSpeedlr(double *, double *, Indices &);
 /* ********************************************************************* */
 
 /* source.cpp ********************************************************** */
 #pragma acc routine seq
 int powell_source(double *, double *, double);
-/* ********************************************************************* */
-
-/* set_indexes.cpp ***************************************************** */
-void SetVectorIndices (int);
-void SetVectorIndices2D (int);
 /* ********************************************************************* */
 
 /* nvtx.cpp ***************************************************** */
