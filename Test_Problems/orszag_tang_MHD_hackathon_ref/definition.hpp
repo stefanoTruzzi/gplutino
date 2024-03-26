@@ -24,7 +24,7 @@
 
 /* TIME */
 #define TSTART    1e-4
-#define TSTOP     0.5
+#define TSTOP     1e-3
 
 
 /* INNER OUTPUT (put 0 if you want only first and last)*/

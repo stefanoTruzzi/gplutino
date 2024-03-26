@@ -41,11 +41,13 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
   mynvtxstart_("RK update STAGE 1", YELLOW);
   #pragma acc parallel loop 
 	for(int i= ibeg; i <= iend; i++){
-    #pragma acc loop vector 
+    #pragma acc loop vector collapse(2)
     for(int j= jbeg; j <= jend; j++){
       for(int nvar =0; nvar < NVAR; nvar++){
         U1[i][j][nvar] = U[i][j][nvar] + dt*R[i][j][nvar]; 
-      }
+      }}
+      #pragma acc loop vector
+    for(int j= jbeg; j <= jend; j++){
       cons_to_prim(U1[i][j],V1[i][j]); 
     }
   }

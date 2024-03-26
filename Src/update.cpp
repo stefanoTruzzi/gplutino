@@ -43,8 +43,9 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   double *fnew = &(f[0][0]);
   double *sourcenew = &(source[0][0]);
   double *lambda_matrix_new = &(lambda_matrix[0][0]);
-
-
+  double *Vptr = &V[0][0][0];
+  //V = Array3D(NX + 2*NGHOST, NY+2*NGHOST, NVAR)
+  int sx = (NY+2*NGHOST) * NVAR;
   int max_size=(dim_max+2*NGHOST)*NVAR; 
   
   mynvtxstart_("UPDATE",RED);
@@ -69,11 +70,19 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
  
   //#pragma acc data copyin (V[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copy(R[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copyout(lambda_matrix[:NX+2*NGHOST][:NY+2*NGHOST])
   //{
+    
   #pragma acc parallel loop private (divB[:(iend+1)],Bn[:iend+2],v1d[:(dim_max+2*NGHOST)*NVAR], vll[:(dim_max+2*NGHOST)*NVAR] , vrr[:(dim_max+2*NGHOST)*NVAR], fnew[:(dim_max+2*NGHOST)*NVAR], sourcenew[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
-  for(j = jbeg; j <= jend; j++){
+    for(j = jbeg; j <= jend; j++){
+
     #pragma acc loop vector collapse(2)
     for(i = 0; i < iend+NGHOST; i++){
-       for(nv = 0; nv < NVAR; nv++){ v1d[i*NVAR+nv] = V[i][j][nv];}
+       for(nv = 0; nv < NVAR; nv++){ 
+        // v1d[i*NVAR+nv] = V[i][j][nv]; 
+        // changed this to obtain reduce the GPU memory troughput. 
+        // before the array was not loaded efficiently 
+        // V[][][] is a *** and contains a lot of ** and * 
+        // Vptr contains only 1 * !!! 
+        v1d[i*NVAR+nv] = Vptr[sx*i+NVAR*j+nv];}
     }
     /*
     for(j=jbeg;j<=jend ; j++){
@@ -140,10 +149,11 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   indices.SetVectorIndices(JDIR);
   
   mynvtxstart_("Y_Cycle UPDATE",CYAN);
-  #pragma acc parallel loop private (divB[:(jend+1)],Bn[:jend+2],v1d[:(dim_max+2*NGHOST)*NVAR], vll[:(dim_max+2*NGHOST)*NVAR] , vrr[:(dim_max+2*NGHOST)*NVAR], fnew[:(dim_max+2*NGHOST)*NVAR], sourcenew[:(dim_max+2*NGHOST)*NVAR])//takes the next loop (j) and divide it over SM and Threads 
+  #pragma acc parallel loop reduction(max:lambda_max) private (divB[:(jend+1)],Bn[:jend+2],v1d[:(dim_max+2*NGHOST)*NVAR], vll[:(dim_max+2*NGHOST)*NVAR] , vrr[:(dim_max+2*NGHOST)*NVAR], fnew[:(dim_max+2*NGHOST)*NVAR], sourcenew[:(dim_max+2*NGHOST)*NVAR])//takes the next loop (j) and divide it over SM and Threads 
   for(i = ibeg; i <= iend; i++){    
     #pragma acc loop vector collapse(2)
-    for(j = 0; j < jend+NGHOST; j++){
+    for(j = 0; j < jend+NGHOST; j++){ 
+      // this must be broken in chunk of 32 
       for(nv = 0; nv < NVAR; nv++) 
         v1d[j*NVAR + nv] = V[i][j][nv];
         // v1D[j][nv] = V[i][j][nv];
@@ -160,7 +170,9 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
       #if DIMENSION == DIMX2
         lambda_matrix[i][j] = lambda / dy;
       #else
-        lambda_matrix[i][j] += lambda / dy;
+        //lambda_matrix[i][j] += lambda / dy;
+        lambda = lambda_matrix[i][j]+ lambda / dy;
+        lambda_max = MAX(lambda,lambda_max);
       #endif
     }
     
@@ -210,6 +222,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   #if DIMENSIONS == DIMX2 
   dx = dy;
   #endif
+  /*
   lambda_max = 0.0;
   
   mynvtxstart_("CHECK_MAX_SPEED",RAPIDS);
@@ -221,7 +234,7 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
       lambda_max = MAX(lambda_matrix[i][j],lambda_max);
   }
   mynvtxstop_();
-
+  */
   dxyzmax = MAX(dx,dy);
   dt = (double)CFL* DIMENSIONS/lambda_max;
   
