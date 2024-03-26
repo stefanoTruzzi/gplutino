@@ -108,7 +108,10 @@ int main()
       #error Invalid order
     #endif
     // update step and t
+    
+    mynvtxstart_("Print",WHITE);
     printf("Nstep: %d , time: %f , dt %f lambda_max %f, dxyzmax %f \n" ,nstep, t,datainfo.dt_update, datainfo.lambda_max, datainfo.dxyzmax);
+    mynvtxstop_();
 
     nstep++;
     t=t+dt;

@@ -67,17 +67,13 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     }}
   */
  
-  printf("UPDATE \n");
-
   //#pragma acc data copyin (V[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copy(R[:(dim_max+2*NGHOST)*NVAR][:(dim_max+2*NGHOST)*NVAR][:NVAR]) copyout(lambda_matrix[:NX+2*NGHOST][:NY+2*NGHOST])
   //{
   #pragma acc parallel loop private (divB[:(iend+1)],Bn[:iend+2],v1d[:(dim_max+2*NGHOST)*NVAR], vll[:(dim_max+2*NGHOST)*NVAR] , vrr[:(dim_max+2*NGHOST)*NVAR], fnew[:(dim_max+2*NGHOST)*NVAR], sourcenew[:(dim_max+2*NGHOST)*NVAR]) //takes the next loop (j) and divide it over SM and Threads 
   for(j = jbeg; j <= jend; j++){
     #pragma acc loop vector collapse(2)
     for(i = 0; i < iend+NGHOST; i++){
-       for(nv = 0; nv < NVAR; nv++){ v1d[i*NVAR+nv] = V[i][j][nv];
-       if(i == 30 && j == 30)
-        printf("v1d[rho] %f , v1d[vx1] %f , v1d[vx2] %f\n",v1d[i*NVAR+0],v1d[i*NVAR+1],v1d[i*NVAR+2]);}
+       for(nv = 0; nv < NVAR; nv++){ v1d[i*NVAR+nv] = V[i][j][nv];}
     }
     /*
     for(j=jbeg;j<=jend ; j++){
@@ -92,8 +88,6 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     #pragma acc loop vector
     for(i=ibeg;i<= iend+1; i++){
       double lambda = riemannLF (&vll[i*NVAR], &vrr[i*NVAR] , &fnew[i*NVAR], IDIR, i, indices);
-      if(i == 30 && j == 30)
-      printf("lambda %f , vrr[BXn] %f , vll[BXn] %f\n",lambda,vrr[i*NVAR+indices.BXn],vll[i*NVAR+indices.BXn]);
       lambda_matrix[i][j] = lambda /dx;
     } 
 
@@ -107,10 +101,6 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
     for(int i = ibeg ; i<= iend; i++){
       divB[i] = (Bn[i+1] - Bn[i]) / dx; 
       powell_source(&v1d[i*NVAR],&sourcenew[i*NVAR],divB[i]);
-
-      if(i == 30 && j == 30 )
-      printf("vll[BXn] %f - vrr[BXn] %f\n",vll[i*NVAR+indices.BXn] ,vrr[i*NVAR+indices.BXn]);
-
       #ifdef DEBUG_DIVB
       divB_max = MAX(divB_max, divB[i]);
       divB_min = MIN(divB_min, divB[i]);
@@ -125,8 +115,6 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
           #if SOURCE == POWELL
           R[i][j][nv] += sourcenew[(i)*NVAR+nv];
           #endif
-                      if(i == 30 && j == 30 )
-      printf("R --- SOURCE %f - %f\n",R[i][j][nv], sourcenew[(i)*NVAR+nv]);
         }
     }
   }
@@ -223,11 +211,17 @@ double update(DataInfo &datainfo, double ***V, double ***R, int ibeg, int iend, 
   dx = dy;
   #endif
   lambda_max = 0.0;
+  
+  mynvtxstart_("CHECK_MAX_SPEED",RAPIDS);
+
+  #pragma acc parallel loop collapse(2) reduction(max:lambda_max)
   for(int j = jbeg; j<=jend; j++){
     for(int i=ibeg; i<= iend; i++) 
       //lambda_max = MAX(lambda_matrix_new[(i*dim_max+2*NGHOST)+j],lambda_max);
       lambda_max = MAX(lambda_matrix[i][j],lambda_max);
   }
+  mynvtxstop_();
+
   dxyzmax = MAX(dx,dy);
   dt = (double)CFL* DIMENSIONS/lambda_max;
   

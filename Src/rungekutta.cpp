@@ -39,26 +39,33 @@ double rk2_step(DataInfo &datainfo, double ***U,double ***V,int ibeg,int iend,in
 	// U1 = U+ dt*R1
   
   mynvtxstart_("RK update STAGE 1", YELLOW);
+  #pragma acc parallel loop 
 	for(int i= ibeg; i <= iend; i++){
-  for(int j= jbeg; j <= jend; j++){
-		for(int nvar =0; nvar < NVAR; nvar++){
-			U1[i][j][nvar] = U[i][j][nvar] + dt*R[i][j][nvar]; 
+    #pragma acc loop vector 
+    for(int j= jbeg; j <= jend; j++){
+      for(int nvar =0; nvar < NVAR; nvar++){
+        U1[i][j][nvar] = U[i][j][nvar] + dt*R[i][j][nvar]; 
+      }
+      cons_to_prim(U1[i][j],V1[i][j]); 
     }
-    cons_to_prim(U1[i][j],V1[i][j]); 
-  }}
+  }
+
   mynvtxstop_();
   boundary_conditions(V1,ibeg,iend,jbeg,jend);
   update(datainfo, V1,R1, ibeg, iend, jbeg, jend, dx, dy, indices);
     
   mynvtxstart_("RK update STAGE 2", ORANGE);
+  #pragma acc parallel loop 
   for(int i= ibeg; i <= iend; i++){
-  for(int j= jbeg; j <= jend; j++){
-		for(int nvar =0; nvar < NVAR; nvar++){
-	  U[i][j][nvar] = 0.5*(U1[i][j][nvar]+U[i][j][nvar]) + 0.5*dt*R1[i][j][nvar]; // +dt*Rt[j][i][nvar]
-    //U[i][j][nvar] = U[i][j][nvar] + dt * 0.5 * ( R[i][j][nvar] + R1[i][j][nvar]); // +dt*Rt[j][i][nvar]
+    #pragma acc loop vector 
+    for(int j= jbeg; j <= jend; j++){
+      for(int nvar =0; nvar < NVAR; nvar++){
+      U[i][j][nvar] = 0.5*(U1[i][j][nvar]+U[i][j][nvar]) + 0.5*dt*R1[i][j][nvar]; // +dt*Rt[j][i][nvar]
+      //U[i][j][nvar] = U[i][j][nvar] + dt * 0.5 * ( R[i][j][nvar] + R1[i][j][nvar]); // +dt*Rt[j][i][nvar]
+      }
+      cons_to_prim(U[i][j],V[i][j]); 
     }
-    cons_to_prim(U[i][j],V[i][j]); 
-  }}
+  }
   mynvtxstop_();
 
 	return (dt);

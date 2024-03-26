@@ -8,6 +8,7 @@ int boundary_conditions(double ***v, int ibeg, int iend, int jbeg, int jend){
   int i,  j;
   
   mynvtxstart_("BOUNDARY",PURPLE);
+  #pragma acc parallel loop collapse(3)
   for (j = 0; j < jend + NGHOST; j++){
   for (i = 1; i <= NGHOST; i++){
     for (int nv = 0; nv < NVAR; nv++){
@@ -21,7 +22,8 @@ int boundary_conditions(double ***v, int ibeg, int iend, int jbeg, int jend){
       #endif
     }
   }}  
-
+  
+  #pragma acc parallel loop collapse(3)
   for(int i = 0 ; i < iend + NGHOST; i++){
   for(int j = 1; j <= NGHOST ; j++){
     for (int nv = 0; nv < NVAR; nv++){

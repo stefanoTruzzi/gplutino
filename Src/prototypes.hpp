@@ -13,6 +13,7 @@ int boundary_conditions(double ***, int, int, int, int);
 /* ********************************************************************* */
 
 /* cons_and_prim.cpp *************************************************** */
+#pragma acc routine seq
 int cons_to_prim(double *, double *);
 
 #pragma acc routine seq
