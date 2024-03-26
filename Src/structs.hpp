@@ -10,3 +10,17 @@ struct DataInfo{
   double dx;
   double dy;
 };
+
+struct Indices
+{
+  int VXn, MXn;
+  int VXb, MXb;
+  int VXt, MXt;
+
+  int BXn,BXt,BXb;
+  int EXn,EXt,EXb;
+
+  void Indices::SetVectorIndices (int);
+
+
+};
