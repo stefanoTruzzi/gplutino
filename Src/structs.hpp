@@ -20,7 +20,7 @@ struct Indices
   int BXn,BXt,BXb;
   int EXn,EXt,EXb;
 
-  void Indices::SetVectorIndices (int);
+  void SetVectorIndices (int);
 
 
 };
